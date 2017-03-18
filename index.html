@@ -82,7 +82,35 @@
       
         <p>&emsp;&emsp;我们写了一些建议，来演示如何使用OKHttp来解决一些常见问题。</p>
 <h4 id="同步GET"><a href="#同步GET" class="headerlink" title="同步GET"></a>同步GET</h4><p>&emsp;&emsp;下载文件，打印header，打印body。<br>&emsp;&emsp;<code>string()</code>方法对于小文档的响应来说是个既方便有高效的方法。但是如果一个文档太大（大于1M），就不要使用<code>string()</code>方法了，以为他会把整个文档加载到内存中,在这种情况下可以把body当作流来处理。  </p>
- <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div></pre></td><td class="code"><pre><div class="line">   private final OkHttpClient client = new OkHttpClient();</div><div class="line"></div><div class="line">   public void run() throws Exception &#123;</div><div class="line">       Request request = new Request.Builder()</div><div class="line">           .url(&quot;http://publicobject.com/helloworld.txt&quot;)</div><div class="line">           .build();</div><div class="line"></div><div class="line">       Response response = client.newCall(request).execute();</div><div class="line">       if (!response.isSuccessful()) throw new IOException(&quot;Unexpected code &quot; + response);</div><div class="line"></div><div class="line">       Headers responseHeaders = response.headers();</div><div class="line">       for (int i = 0; i &lt; responseHeaders.size(); i++) &#123;</div><div class="line">       System.out.println(responseHeaders.name(i) + &quot;: &quot; + responseHeaders.value(i));</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       System.out.println(response.body().string());</div><div class="line">   </div><div class="line">```       </div><div class="line"></div><div class="line">#### 异步GET</div><div class="line">&amp;emsp;&amp;emsp;在工作线程下载文件，响应可读后回调。在响应的header准备好的时候回调。响应体可能仍然阻塞。现在OKHttp没有提供获取响应体的异步API。</div><div class="line"></div><div class="line">```    </div><div class="line"> private final OkHttpClient client = new OkHttpClient();</div><div class="line"></div><div class="line"> public void run() throws Exception &#123;</div><div class="line">   Request request = new Request.Builder()</div><div class="line">       .url(&quot;http://publicobject.com/helloworld.txt&quot;)</div><div class="line">       .build();</div><div class="line"></div><div class="line">   client.newCall(request).enqueue(new Callback() &#123;</div><div class="line">     @Override public void onFailure(Call call, IOException e) &#123;</div><div class="line">       e.printStackTrace();</div><div class="line">     &#125;</div><div class="line"></div><div class="line">     @Override public void onResponse(Call call, Response response) throws IOException &#123;</div><div class="line">       if (!response.isSuccessful()) throw new IOException(&quot;Unexpected code &quot; + response);</div><div class="line"></div><div class="line">       Headers responseHeaders = response.headers();</div><div class="line">       for (int i = 0, size = responseHeaders.size(); i &lt; size; i++) &#123;</div><div class="line">         System.out.println(responseHeaders.name(i) + &quot;: &quot; + responseHeaders.value(i));</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       System.out.println(response.body().string());</div><div class="line">     &#125;</div><div class="line">   &#125;);</div><div class="line"> &#125;</div><div class="line">```    </div><div class="line"></div><div class="line">#### 访问Header</div><div class="line">&amp;emsp;&amp;emsp;总体上说Header有点像`Map&lt;String,String&gt;`，每一个字段都有或没有值。但是一些Header允许有多个值，就像Guava的`[Multimap](http://docs.guava-libraries.googlecode.com/git/javadoc/com/google/common/collect/Multimap.html)`。</div><div class="line">例如HTTP提供多个Vary`的值是很常见并且合法的。OKHttp的API在这两种情况下都能轻松使用。</div><div class="line">&amp;emsp;&amp;emsp;当写入请求header的时候使用`header(name,value)`设置仅有一个的`name`和`value`。如果有存在的值，会先移除值再添加。 使用`addHeader(name,value)`添加header不会移除已经存在的header。</div><div class="line">&amp;emsp;&amp;emsp;当读响应header的时候，`header(name)`只返回最后一个值，通常也仅有一个。如果没有值，将会返回null。以一个list的方式获取所有的值可以使用`headers(name)`。</div><div class="line">&amp;emsp;&amp;emsp;如果要访问所有的header，可以使用Headers类，支持坐标访问。</div><div class="line"></div><div class="line">```    </div><div class="line"> private final OkHttpClient client = new OkHttpClient();</div><div class="line"></div><div class="line"> public void run() throws Exception &#123;</div><div class="line">   Request request = new Request.Builder()</div><div class="line">       .url(&quot;https://api.github.com/repos/square/okhttp/issues&quot;)</div><div class="line">       .header(&quot;User-Agent&quot;, &quot;OkHttp Headers.java&quot;)</div><div class="line">       .addHeader(&quot;Accept&quot;, &quot;application/json; q=0.5&quot;)</div><div class="line">       .addHeader(&quot;Accept&quot;, &quot;application/vnd.github.v3+json&quot;)</div><div class="line">       .build();</div><div class="line"></div><div class="line">   Response response = client.newCall(request).execute();</div><div class="line">   if (!response.isSuccessful()) throw new IOException(&quot;Unexpected code &quot; + response);</div><div class="line"></div><div class="line">   System.out.println(&quot;Server: &quot; + response.header(&quot;Server&quot;));</div><div class="line">   System.out.println(&quot;Date: &quot; + response.header(&quot;Date&quot;));</div><div class="line">   System.out.println(&quot;Vary: &quot; + response.headers(&quot;Vary&quot;));</div><div class="line"> &#125;</div><div class="line">```   </div><div class="line"></div><div class="line">#### 使用POST发送String请求。</div><div class="line">&amp;emsp;&amp;emsp;使用HTTP的POST给服务发送请求。这个例子发送了一个markdown文档到服务器用来将markdown渲染成HTML。因为整个请求是放在内存中的，所以使用此API的时候避免大文档（小于1M）。</div></pre></td></tr></table></figure>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">   private final OkHttpClient client = new OkHttpClient();</div><div class="line"></div><div class="line">   public void run() throws Exception &#123;</div><div class="line">       Request request = new Request.Builder()</div><div class="line">           .url(&quot;http://publicobject.com/helloworld.txt&quot;)</div><div class="line">           .build();</div><div class="line"></div><div class="line">       Response response = client.newCall(request).execute();</div><div class="line">       if (!response.isSuccessful()) throw new IOException(&quot;Unexpected code &quot; + response);</div><div class="line"></div><div class="line">       Headers responseHeaders = response.headers();</div><div class="line">       for (int i = 0; i &lt; responseHeaders.size(); i++) &#123;</div><div class="line">       System.out.println(responseHeaders.name(i) + &quot;: &quot; + responseHeaders.value(i));</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       System.out.println(response.body().string());</div><div class="line">   </div><div class="line">```       </div><div class="line"></div><div class="line">#### 异步GET</div><div class="line">&amp;emsp;&amp;emsp;在工作线程下载文件，响应可读后回调。在响应的header准备好的时候回调。响应体可能仍然阻塞。现在OKHttp没有提供获取响应体的异步API。</div></pre></td></tr></table></figure>
+<p>  private final OkHttpClient client = new OkHttpClient();</p>
+<p>  public void run() throws Exception {<br>    Request request = new Request.Builder()<br>        .url(“<a href="http://publicobject.com/helloworld.txt" target="_blank" rel="external">http://publicobject.com/helloworld.txt</a>“)<br>        .build();</p>
+<pre><code>client.newCall(request).enqueue(new Callback() {
+  @Override public void onFailure(Call call, IOException e) {
+    e.printStackTrace();
+  }
+
+  @Override public void onResponse(Call call, Response response) throws IOException {
+    if (!response.isSuccessful()) throw new IOException(&quot;Unexpected code &quot; + response);
+
+    Headers responseHeaders = response.headers();
+    for (int i = 0, size = responseHeaders.size(); i &lt; size; i++) {
+      System.out.println(responseHeaders.name(i) + &quot;: &quot; + responseHeaders.value(i));
+    }
+
+    System.out.println(response.body().string());
+  }
+});
+</code></pre><p>  }<br> <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">#### 访问Header</div><div class="line">&amp;emsp;&amp;emsp;总体上说Header有点像`Map&lt;String,String&gt;`，每一个字段都有或没有值。但是一些Header允许有多个值，就像Guava的`[Multimap](http://docs.guava-libraries.googlecode.com/git/javadoc/com/google/common/collect/Multimap.html)`。</div><div class="line">例如HTTP提供多个Vary`的值是很常见并且合法的。OKHttp的API在这两种情况下都能轻松使用。</div><div class="line">&amp;emsp;&amp;emsp;当写入请求header的时候使用`header(name,value)`设置仅有一个的`name`和`value`。如果有存在的值，会先移除值再添加。 使用`addHeader(name,value)`添加header不会移除已经存在的header。</div><div class="line">&amp;emsp;&amp;emsp;当读响应header的时候，`header(name)`只返回最后一个值，通常也仅有一个。如果没有值，将会返回null。以一个list的方式获取所有的值可以使用`headers(name)`。</div><div class="line">&amp;emsp;&amp;emsp;如果要访问所有的header，可以使用Headers类，支持坐标访问。</div></pre></td></tr></table></figure></p>
+<p>  private final OkHttpClient client = new OkHttpClient();</p>
+<p>  public void run() throws Exception {<br>    Request request = new Request.Builder()<br>        .url(“<a href="https://api.github.com/repos/square/okhttp/issues" target="_blank" rel="external">https://api.github.com/repos/square/okhttp/issues</a>“)<br>        .header(“User-Agent”, “OkHttp Headers.java”)<br>        .addHeader(“Accept”, “application/json; q=0.5”)<br>        .addHeader(“Accept”, “application/vnd.github.v3+json”)<br>        .build();</p>
+<pre><code>Response response = client.newCall(request).execute();
+if (!response.isSuccessful()) throw new IOException(&quot;Unexpected code &quot; + response);
+
+System.out.println(&quot;Server: &quot; + response.header(&quot;Server&quot;));
+System.out.println(&quot;Date: &quot; + response.header(&quot;Date&quot;));
+System.out.println(&quot;Vary: &quot; + response.headers(&quot;Vary&quot;));
+</code></pre><p>  }<br> <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">#### 使用POST发送String请求。</div><div class="line">&amp;emsp;&amp;emsp;使用HTTP的POST给服务发送请求。这个例子发送了一个markdown文档到服务器用来将markdown渲染成HTML。因为整个请求是放在内存中的，所以使用此API的时候避免大文档（小于1M）。</div></pre></td></tr></table></figure></p>
 <p>   public static final MediaType MEDIA_TYPE_MARKDOWN<br>      = MediaType.parse(“text/x-markdown; charset=utf-8”);</p>
 <p>  private final OkHttpClient client = new OkHttpClient();</p>
 <p>  public void run() throws Exception {<br>    String postBody = “”</p>
@@ -201,7 +229,7 @@ System.out.println(&quot;Response 2 cache response:    &quot; + response2.cacheR
 System.out.println(&quot;Response 2 network response:  &quot; + response2.networkResponse());
 
 System.out.println(&quot;Response 2 equals Response 1? &quot; + response1Body.equals(response2Body));
-</code></pre><p>  }<br> <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">&amp;emsp;&amp;emsp;为了阻止缓冲可以使用`[CacheControl.FORCE_NETWORK](CacheControl.FORCE_NETWORK)`.为了阻止网络连接可以使用`[CacheControl.FORCE_CACHE](http://square.github.io/okhttp/3.x/okhttp/okhttp3/CacheControl.html#FORCE_CACHE)`。警告：如果使用了`FORCE_CACHE`并且响应需要网络，将会返回`504 Unsatisfiable Request`。</div><div class="line">#### 取消请求</div><div class="line">&amp;emsp;&amp;emsp;使用`Call.cancel()`立即取消正在进行的请求。如果一个线程正在写一个请求或者读一个响应将会抛出IOException。当一个请求不在需要的时候使用这个函数来保护网络。例如当用户导航离开应用的时候。同步和异步的请求都可以取消。</div></pre></td></tr></table></figure></p>
+</code></pre><p>  }<br> <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">&amp;emsp;&amp;emsp;为了阻止缓冲可以使用`[CacheControl.FORCE_NETWORK](CacheControl.FORCE_NETWORK)`.为了阻止网络连接可以使用`[CacheControl.FORCE_CACHE](http://square.github.io/okhttp/3.x/okhttp/okhttp3/CacheControl.html#FORCE_CACHE)`。警告：如果使用了`FORCE_CACHE`并且响应需要网络，将会返回`504 Unsatisfiable Request`。</div><div class="line">#### 取消请求</div><div class="line">&amp;emsp;&amp;emsp;使用`Call.cancel()`立即取消正在进行的请求。如果一个线程正在写一个请求或者读一个响应将会抛出IOException。当一个请求不在需要的时候使用这个函数来保护网络。例如当用户导航离开应用的时候。同步和异步的请求都可以取消。</div></pre></td></tr></table></figure></p>
 <pre><code>private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
 </code></pre><p>  private final OkHttpClient client = new OkHttpClient();</p>
 <p>  public void run() throws Exception {<br>    Request request = new Request.Builder()<br>        .url(“<a href="http://httpbin.org/delay/2" target="_blank" rel="external">http://httpbin.org/delay/2</a>“) // This URL is served with a 2 second delay.<br>        .build();</p>
@@ -271,7 +299,7 @@ System.out.println(response.body().string());
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://mashuai.github.io/2017/03/18/okhttp/Recipes/" data-id="cj0fabyt400198hit51ljjfcg" class="article-share-link">Share</a>
+      <a data-url="https://mashuai.github.io/2017/03/18/okhttp/Recipes/" data-id="cj0faeaa100189sit87ufv5ee" class="article-share-link">Share</a>
       
         <a href="https://mashuai.github.io/2017/03/18/okhttp/Recipes/#disqus_thread" class="article-comment-link">Comments</a>
       
@@ -328,7 +356,7 @@ System.out.println(response.body().string());
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://mashuai.github.io/2017/03/18/okhttp/connections/" data-id="cj0fabyt6001b8hit6rrm31tp" class="article-share-link">Share</a>
+      <a data-url="https://mashuai.github.io/2017/03/18/okhttp/connections/" data-id="cj0faeaa4001b9sit6j14t0uo" class="article-share-link">Share</a>
       
         <a href="https://mashuai.github.io/2017/03/18/okhttp/connections/#disqus_thread" class="article-comment-link">Comments</a>
       
@@ -381,7 +409,7 @@ System.out.println(response.body().string());
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://mashuai.github.io/2017/03/18/okhttp/calls/" data-id="cj0fabyt300188hit770yjl61" class="article-share-link">Share</a>
+      <a data-url="https://mashuai.github.io/2017/03/18/okhttp/calls/" data-id="cj0faeaa200199sitseamcvwq" class="article-share-link">Share</a>
       
         <a href="https://mashuai.github.io/2017/03/18/okhttp/calls/#disqus_thread" class="article-comment-link">Comments</a>
       
@@ -434,7 +462,7 @@ System.out.println(response.body().string());
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://mashuai.github.io/2015/11/14/为Go-Web-App-创建一个主页面/" data-id="cj0fabyro00088hitgbilozpa" class="article-share-link">Share</a>
+      <a data-url="https://mashuai.github.io/2015/11/14/为Go-Web-App-创建一个主页面/" data-id="cj0faea8n00089sit2lqcsdar" class="article-share-link">Share</a>
       
         <a href="https://mashuai.github.io/2015/11/14/为Go-Web-App-创建一个主页面/#disqus_thread" class="article-comment-link">Comments</a>
       
@@ -498,7 +526,7 @@ System.out.println(response.body().string());
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://mashuai.github.io/2015/11/12/http-Handler-与Go的错误处理/" data-id="cj0fabyrl00078hitefa4zukg" class="article-share-link">Share</a>
+      <a data-url="https://mashuai.github.io/2015/11/12/http-Handler-与Go的错误处理/" data-id="cj0faea8m00079sit6m061reu" class="article-share-link">Share</a>
       
         <a href="https://mashuai.github.io/2015/11/12/http-Handler-与Go的错误处理/#disqus_thread" class="article-comment-link">Comments</a>
       
@@ -584,7 +612,7 @@ System.out.println(response.body().string());
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://mashuai.github.io/2015/11/12/使用Go开发HTTP中间件/" data-id="cj0fabyrt000a8hit02vq0kti" class="article-share-link">Share</a>
+      <a data-url="https://mashuai.github.io/2015/11/12/使用Go开发HTTP中间件/" data-id="cj0faea8s000a9sit2dkvh1gi" class="article-share-link">Share</a>
       
         <a href="https://mashuai.github.io/2015/11/12/使用Go开发HTTP中间件/#disqus_thread" class="article-comment-link">Comments</a>
       
@@ -630,7 +658,7 @@ System.out.println(response.body().string());
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://mashuai.github.io/2015/11/12/HTTP-2-和GO/" data-id="cj0fabyrc00038hit4ndadobv" class="article-share-link">Share</a>
+      <a data-url="https://mashuai.github.io/2015/11/12/HTTP-2-和GO/" data-id="cj0faea8b00039sits27h2af6" class="article-share-link">Share</a>
       
         <a href="https://mashuai.github.io/2015/11/12/HTTP-2-和GO/#disqus_thread" class="article-comment-link">Comments</a>
       
@@ -697,7 +725,7 @@ System.out.println(response.body().string());
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://mashuai.github.io/2015/11/10/Go-Web-架构/" data-id="cj0fabyr300018hitjrnbgbb1" class="article-share-link">Share</a>
+      <a data-url="https://mashuai.github.io/2015/11/10/Go-Web-架构/" data-id="cj0faea8400019sity5eajqxz" class="article-share-link">Share</a>
       
         <a href="https://mashuai.github.io/2015/11/10/Go-Web-架构/#disqus_thread" class="article-comment-link">Comments</a>
       
@@ -757,7 +785,7 @@ System.out.println(response.body().string());
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://mashuai.github.io/2015/11/09/Ansible-入门指南/" data-id="cj0fabyqy00008hithgk3h0bf" class="article-share-link">Share</a>
+      <a data-url="https://mashuai.github.io/2015/11/09/Ansible-入门指南/" data-id="cj0faea7z00009situ2zfi7gk" class="article-share-link">Share</a>
       
         <a href="https://mashuai.github.io/2015/11/09/Ansible-入门指南/#disqus_thread" class="article-comment-link">Comments</a>
       
@@ -837,7 +865,7 @@ System.out.println(response.body().string());
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://mashuai.github.io/2015/11/08/Vagrant-Ansible-快速入门教程/" data-id="cj0fabyrd00048hitbm4z5mug" class="article-share-link">Share</a>
+      <a data-url="https://mashuai.github.io/2015/11/08/Vagrant-Ansible-快速入门教程/" data-id="cj0faea8c00049sitmezvy70s" class="article-share-link">Share</a>
       
         <a href="https://mashuai.github.io/2015/11/08/Vagrant-Ansible-快速入门教程/#disqus_thread" class="article-comment-link">Comments</a>
       
