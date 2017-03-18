@@ -88,16 +88,16 @@
 <h5 id="重写响应"><a href="#重写响应" class="headerlink" title="重写响应"></a>重写响应</h5><p>&emsp;&emsp;如果透明压缩启用了，OKHttp将会把<code>Content-Encoding</code>和<code>Content-Length</code>从headers中移除，因为他们不是用来解压缩的。<br>&emsp;&emsp;如果条件GET请求成功，从网上下载的响应和缓存的响应根据Spec合并。</p>
 <h5 id="后续请求"><a href="#后续请求" class="headerlink" title="后续请求"></a>后续请求</h5><p>&emsp;&emsp;当请求的URL被转移了，web server 将会返回一个302的状态码来表示这个文档的新URL，OKHttp将会重定向到新的URL获取最终的响应。<br>&emsp;&emsp;如果响应需要认证，OKHttp将会使用<code>Authenticator</code>（如果提供了一个）来认证。如果认证器提供了凭证，请求回使用凭证重试。</p>
 <h5 id="重试请求"><a href="#重试请求" class="headerlink" title="重试请求"></a>重试请求</h5><p>&emsp;&emsp;有时连接失败，例如：连接池过期断开链接，或者无法连接服务器。OKHttp会通过不同的可用路由来重试请求。</p>
-<h4 id="calls"><a href="#calls" class="headerlink" title="calls"></a>calls</h4><p>&emsp;&emsp;通过重写，重定向，继续请求和重试，一个简单的请求可能会产生很多请求和响应。OKHttp使用<code>call</code>建立一个不管多少中间请求和响应的任务模型。总的来说这不多。但是了解代码将会继续工作，不管是URL重定向或者是转移故障其他IP。<br>&emsp;&emsp;call有两种工作方式</p>
-<pre><code>* 同步：线程将会阻塞道到响应可读。
-* 异步：将请求加入到其他线程的队列，当响应可读诗时，会在其他的线程获取回调。
-</code></pre><p>&emsp;&emsp;请求调用可以在任何线程取消。如果调用未完成，这个请求将会失败。当调用取消时，在先请求踢体或者读响应体的代码将会跑出IOException的异常。</p>
-<h5 id="调度"><a href="#调度" class="headerlink" title="调度"></a>调度</h5><p>&emsp;&emsp;对于同步调用，将会由自身线程控制多少并发请求。太多并发连接浪费资源，太少又回有高延迟。<br>&emsp;&emsp;对于异步来说，Dispatcher实现了最大并发的策略。可以设置没个服务器的最大并发（默认是5）和总体的并发（默认64）。</p>
+<h4 id="calls"><a href="#calls" class="headerlink" title="calls"></a>calls</h4><p>&emsp;&emsp;通过重写，重定向，继续请求和重试，一个简单的请求可能会产生很多请求和响应。OKHttp使用<code>call</code>建立一个不管多少中间请求和响应的任务模型。总的来说这不多。但是了解代码将会继续工作，不管是URL重定向或者是转移故障其他IP。<br>&emsp;&emsp;call有两种工作方</p>
+<ul>
+<li>同步：线程将会阻塞道到响应可读。</li>
+<li>异步：将请求加入到其他线程的队列，当响应可读诗时，会在其他的线程获取回调。<br>&emsp;&emsp;请求调用可以在任何线程取消。如果调用未完成，这个请求将会失败。当调用取消时，在先请求踢体或者读响应体的代码将会跑出IOException的异常。<h5 id="调度"><a href="#调度" class="headerlink" title="调度"></a>调度</h5>&emsp;&emsp;对于同步调用，将会由自身线程控制多少并发请求。太多并发连接浪费资源，太少又回有高延迟。<br>&emsp;&emsp;对于异步来说，Dispatcher实现了最大并发的策略。可以设置没个服务器的最大并发（默认是5）和总体的并发（默认64）。</li>
+</ul>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://mashuai.github.io/2017/03/18/calls/" data-id="cj0eyq90f000732ithcfp2sdb" class="article-share-link">Share</a>
+      <a data-url="https://mashuai.github.io/2017/03/18/calls/" data-id="cj0eyumor000765itzm1lw090" class="article-share-link">Share</a>
       
         <a href="https://mashuai.github.io/2017/03/18/calls/#disqus_thread" class="article-comment-link">Comments</a>
       
@@ -150,7 +150,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://mashuai.github.io/2015/11/14/为Go-Web-App-创建一个主页面/" data-id="cj0eyq90o000a32it4zmv2k48" class="article-share-link">Share</a>
+      <a data-url="https://mashuai.github.io/2015/11/14/为Go-Web-App-创建一个主页面/" data-id="cj0eyump0000a65itnpsp482j" class="article-share-link">Share</a>
       
         <a href="https://mashuai.github.io/2015/11/14/为Go-Web-App-创建一个主页面/#disqus_thread" class="article-comment-link">Comments</a>
       
@@ -214,7 +214,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://mashuai.github.io/2015/11/12/http-Handler-与Go的错误处理/" data-id="cj0eyq90h000832itcgjexcsv" class="article-share-link">Share</a>
+      <a data-url="https://mashuai.github.io/2015/11/12/http-Handler-与Go的错误处理/" data-id="cj0eyumou000865it6g2mqaov" class="article-share-link">Share</a>
       
         <a href="https://mashuai.github.io/2015/11/12/http-Handler-与Go的错误处理/#disqus_thread" class="article-comment-link">Comments</a>
       
@@ -300,7 +300,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://mashuai.github.io/2015/11/12/使用Go开发HTTP中间件/" data-id="cj0eyq90q000c32itwjbhhqmx" class="article-share-link">Share</a>
+      <a data-url="https://mashuai.github.io/2015/11/12/使用Go开发HTTP中间件/" data-id="cj0eyump2000c65itdzesljvu" class="article-share-link">Share</a>
       
         <a href="https://mashuai.github.io/2015/11/12/使用Go开发HTTP中间件/#disqus_thread" class="article-comment-link">Comments</a>
       
@@ -346,7 +346,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://mashuai.github.io/2015/11/12/HTTP-2-和GO/" data-id="cj0eyq904000332itkzj2v3px" class="article-share-link">Share</a>
+      <a data-url="https://mashuai.github.io/2015/11/12/HTTP-2-和GO/" data-id="cj0eyumoa000165it4pfdyojf" class="article-share-link">Share</a>
       
         <a href="https://mashuai.github.io/2015/11/12/HTTP-2-和GO/#disqus_thread" class="article-comment-link">Comments</a>
       
@@ -413,7 +413,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://mashuai.github.io/2015/11/10/Go-Web-架构/" data-id="cj0eyq8zw000132itetsta5di" class="article-share-link">Share</a>
+      <a data-url="https://mashuai.github.io/2015/11/10/Go-Web-架构/" data-id="cj0eyumog000365it4zakag4r" class="article-share-link">Share</a>
       
         <a href="https://mashuai.github.io/2015/11/10/Go-Web-架构/#disqus_thread" class="article-comment-link">Comments</a>
       
@@ -473,7 +473,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://mashuai.github.io/2015/11/09/Ansible-入门指南/" data-id="cj0eyq8zq000032itm8e4a109" class="article-share-link">Share</a>
+      <a data-url="https://mashuai.github.io/2015/11/09/Ansible-入门指南/" data-id="cj0eyumo3000065it5b4v5vhq" class="article-share-link">Share</a>
       
         <a href="https://mashuai.github.io/2015/11/09/Ansible-入门指南/#disqus_thread" class="article-comment-link">Comments</a>
       
@@ -553,7 +553,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://mashuai.github.io/2015/11/08/Vagrant-Ansible-快速入门教程/" data-id="cj0eyq905000432iti1zoqz2t" class="article-share-link">Share</a>
+      <a data-url="https://mashuai.github.io/2015/11/08/Vagrant-Ansible-快速入门教程/" data-id="cj0eyumoi000465itqrwis5v3" class="article-share-link">Share</a>
       
         <a href="https://mashuai.github.io/2015/11/08/Vagrant-Ansible-快速入门教程/#disqus_thread" class="article-comment-link">Comments</a>
       
@@ -658,7 +658,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://mashuai.github.io/2015/11/06/Vagrant-入门指南/" data-id="cj0eyq908000532itpgyfs74s" class="article-share-link">Share</a>
+      <a data-url="https://mashuai.github.io/2015/11/06/Vagrant-入门指南/" data-id="cj0eyumol000565itullhjt00" class="article-share-link">Share</a>
       
         <a href="https://mashuai.github.io/2015/11/06/Vagrant-入门指南/#disqus_thread" class="article-comment-link">Comments</a>
       
