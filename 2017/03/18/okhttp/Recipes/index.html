@@ -5,19 +5,19 @@
   
   <title>OKHttp Recipes | Mashuai&#39;s Notes</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="&amp;emsp;&amp;emsp;我们写了一些建议，来演示如何使用OKHttp来解决一些常见问题。
-同步GET&amp;emsp;&amp;emsp;下载文件，打印header，打印body。&amp;emsp;&amp;emsp;string()方法对于小文档的响应来说是个既方便有高效的方法。但是如果一个文档太大（大于1M），就不要使用string()方法了，以为他会把整个文档加载到内存中,在这种情况下可以把body当作流来处理。">
+  <meta name="description" content="原文地址&amp;emsp;&amp;emsp;我们写了一些建议，来演示如何使用OKHttp来解决一些常见问题。
+同步GET&amp;emsp;&amp;emsp;下载文件，打印header，打印body。&amp;emsp;&amp;emsp;string()方法对于小文档的响应来说是个既方便有高效的方法。但是如果一个文档太大（大于1M），就不要使用string()方法了，以为他会把整个文档加载到内存中,在这种情况下可以把body当作流来处理">
 <meta property="og:type" content="article">
 <meta property="og:title" content="OKHttp Recipes">
 <meta property="og:url" content="https://mashuai.github.io/2017/03/18/okhttp/Recipes/index.html">
 <meta property="og:site_name" content="Mashuai's Notes">
-<meta property="og:description" content="&amp;emsp;&amp;emsp;我们写了一些建议，来演示如何使用OKHttp来解决一些常见问题。
-同步GET&amp;emsp;&amp;emsp;下载文件，打印header，打印body。&amp;emsp;&amp;emsp;string()方法对于小文档的响应来说是个既方便有高效的方法。但是如果一个文档太大（大于1M），就不要使用string()方法了，以为他会把整个文档加载到内存中,在这种情况下可以把body当作流来处理。">
-<meta property="og:updated_time" content="2017-03-18T13:33:58.000Z">
+<meta property="og:description" content="原文地址&amp;emsp;&amp;emsp;我们写了一些建议，来演示如何使用OKHttp来解决一些常见问题。
+同步GET&amp;emsp;&amp;emsp;下载文件，打印header，打印body。&amp;emsp;&amp;emsp;string()方法对于小文档的响应来说是个既方便有高效的方法。但是如果一个文档太大（大于1M），就不要使用string()方法了，以为他会把整个文档加载到内存中,在这种情况下可以把body当作流来处理">
+<meta property="og:updated_time" content="2017-03-18T13:37:55.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="OKHttp Recipes">
-<meta name="twitter:description" content="&amp;emsp;&amp;emsp;我们写了一些建议，来演示如何使用OKHttp来解决一些常见问题。
-同步GET&amp;emsp;&amp;emsp;下载文件，打印header，打印body。&amp;emsp;&amp;emsp;string()方法对于小文档的响应来说是个既方便有高效的方法。但是如果一个文档太大（大于1M），就不要使用string()方法了，以为他会把整个文档加载到内存中,在这种情况下可以把body当作流来处理。">
+<meta name="twitter:description" content="原文地址&amp;emsp;&amp;emsp;我们写了一些建议，来演示如何使用OKHttp来解决一些常见问题。
+同步GET&amp;emsp;&amp;emsp;下载文件，打印header，打印body。&amp;emsp;&amp;emsp;string()方法对于小文档的响应来说是个既方便有高效的方法。但是如果一个文档太大（大于1M），就不要使用string()方法了，以为他会把整个文档加载到内存中,在这种情况下可以把body当作流来处理">
   
     <link rel="alternative" href="/atom.xml" title="Mashuai&#39;s Notes" type="application/atom+xml">
   
@@ -85,7 +85,7 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>&emsp;&emsp;我们写了一些建议，来演示如何使用OKHttp来解决一些常见问题。</p>
+        <p><a href="https://github.com/square/okhttp/wiki/Recipes" target="_blank" rel="external">原文地址</a><br>&emsp;&emsp;我们写了一些建议，来演示如何使用OKHttp来解决一些常见问题。</p>
 <h4 id="同步GET"><a href="#同步GET" class="headerlink" title="同步GET"></a>同步GET</h4><p>&emsp;&emsp;下载文件，打印header，打印body。<br>&emsp;&emsp;<code>string()</code>方法对于小文档的响应来说是个既方便有高效的方法。但是如果一个文档太大（大于1M），就不要使用<code>string()</code>方法了，以为他会把整个文档加载到内存中,在这种情况下可以把body当作流来处理。  </p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">private final OkHttpClient client = new OkHttpClient();</div><div class="line">public void run() throws Exception &#123;</div><div class="line">Request request = new Request.Builder()</div><div class="line">    .url(&quot;http://publicobject.com/helloworld.txt&quot;)</div><div class="line">    .build();</div><div class="line"></div><div class="line">Response response = client.newCall(request).execute();</div><div class="line">if (!response.isSuccessful()) throw new IOException(&quot;Unexpected code &quot; + response);</div><div class="line"></div><div class="line">Headers responseHeaders = response.headers();</div><div class="line">for (int i = 0; i &lt; responseHeaders.size(); i++) &#123;</div><div class="line">System.out.println(responseHeaders.name(i) + &quot;: &quot; + responseHeaders.value(i));</div><div class="line">&#125;</div><div class="line">System.out.println(response.body().string());</div></pre></td></tr></table></figure>
 <h4 id="异步GET"><a href="#异步GET" class="headerlink" title="异步GET"></a>异步GET</h4><p> &emsp;&emsp;在工作线程下载文件，响应可读后回调。在响应的header准备好的时候回调。响应体可能仍然阻塞。现在OKHttp没有提供获取响应体的异步API。</p>
@@ -121,7 +121,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://mashuai.github.io/2017/03/18/okhttp/Recipes/" data-id="cj0faodb5001afbitzpv41dqg" class="article-share-link">Share</a>
+      <a data-url="https://mashuai.github.io/2017/03/18/okhttp/Recipes/" data-id="cj0fauqfd0018juithd875qak" class="article-share-link">Share</a>
       
         <a href="https://mashuai.github.io/2017/03/18/okhttp/Recipes/#disqus_thread" class="article-comment-link">Comments</a>
       
